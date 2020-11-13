@@ -1,1 +1,1 @@
-int froot(double *x0, double x1, double x2, double epsf, double epsx, int secant);
+int froot(double *x0, double x1, double x2, double epsf, double epsx, int useSecant);
