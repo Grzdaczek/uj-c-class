@@ -1,0 +1,33 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define ERR_FOPEN "An error occurred while opening the file."
+
+char* tocapital(char* a) {
+    int i;
+    char* b = malloc(strlen(a)+1);
+    strcpy(b, a);
+    for (i=1; i < strlen(b); i++) b[i] = tolower(b[i]);
+    return b;
+}
+
+int parse_grade(char *x) {
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+    int i;
+    for(i=1; i<argc; i++) {
+        
+        printf("%s", argv[i]);
+        
+        FILE* fptr = fopen(argv[i], "r");
+        if(fptr == NULL) {
+            exit(ERR_FOPEN);
+        }
+        char l[256];
+        while(fscanf(f, "%s", l) != EOF) printf("%s\n", l);
+    }
+}
