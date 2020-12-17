@@ -1,5 +1,32 @@
-JAn kowaLski -5
-AnnA aniszewska 6
-MaReK MaRcIn -3
-tymoteusz zdziczały 2
-joaCHim PelikAn 4+
+1. otwieram plik na odczyt jesli sie nie powiodlo wyrzucam wiadomosc na standart error z nazwa pliku ze nie jestem w stanie przeczytac
+2.wczytuje linijka po linijce, dla kazedj kolejnej licnijki musze zdecydowac czy dopisac ocene czy dopisac nowa osobe
+3. lece po koleji po linjkach
+4. sortuje alfabetycznie nazwisko imie: lista ocen i srednia
+5. wypisuje srednia dla calej grupy oceny/liczbe studentow
+6.kolejny plik
+
+*nie ma znaczenia wielkosc liter - funkcja ktora wezmnie ten tekst i zamieni na polski standart pierwsza duza reszta mala
+*nie kazda ocena ktora jest wpisana nie jest numeryczna np +3, -4 oceny trzymamy jako tekst ale do przeliczenia musimy przeliczyc na liczbe - funckja ktora tekst zamienia na float
+* ocena nie moze byc wieksza niz 6 (2-6 oceny i jeszcze 0) i moga byc na 3,14 czyli zakre 2-5 i jeszce 0 i 6, jezeli ocena nie legalna zglasza to programi np jako -1 nie wliczana do sredniej ale zglaszana jako error imie nazwisko i zla ocena, nie przerywa programu
+* +3 = 3,25  -3=2,75 kolejna funckja
+* zaraz po wczytaniu elementow standaryzowal pierwsza funkcja,
+*w srtutorze macierz-imie(0-30 znakow) macierz-nazwisko(0-30 znakow) macierz dwuwymiaraowa tekstowa (30 na 5)
+* porownaj studentow
+* stdio stdlib
+* jak wypisac na error prawdopodobnie jakas funckja
+* reportujemy na error jezeli funckja nie ma 3 bytow
+* do wypiasania uzywam dwoch forow pierwsza wypisuje imie nazwisko a druga liczy srednia od razu konwertuje tekst na float, dodaje jego srednia to sredniej calej klasy
+* jak prowonac tekst napewno nie tekst == tekst, do tego sluzy pewna fukcja w stdlib i nazwya sie strcmp bierze da strigni i zwraca 0,1,-1 DO POROWNA DOW NAPISAMISA STRCMP
+* jezeli chce przekopiowac jeden napis w inne miejsce trzeba uzyc STRCP/STRCPY
+
+
+
+
+
+
+qsort, WEKTROR , MACIERZ, pojedynczy student opisany structura, cala grupa opisana macierza takich strutor
+
+wszystko w 1 pliku
+
+czytam go w petli(while z break) linjka po linjce , normalizuje imie nazwiskoa w kolejnej krotrzeszj petli sprawdzam czy jest takie imie nazwisko w macierzy jezeli tak dopisuje ocene jezli nie dopisuje kolejna osobe, jezeli przejde caly plik to go zamykam, poleceniem qsort sortuje i pojedyncza petla for wypisuje studenow i kolejna petla wypisuje oceny i srednia
+
