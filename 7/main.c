@@ -5,9 +5,10 @@
 #include "student.h"
 
 int main(int argc, char *argv[]) {
-    Student *group[30];
-    char *line_v = NULL;
     int group_len = 0;
+    int group_size = 0;
+    Student **group = NULL;
+    char *line_v = NULL;
     int i;
     int j;
 
@@ -40,14 +41,30 @@ int main(int argc, char *argv[]) {
             ns->grades_len = 1;
 
             int exists = 0;
-            for (j=0; j<group_len; j++)
-                if (student_cmp(&group[j], &ns) == 0) { exists = 1; os = group[j]; break; }
+            for (j=0; j<group_len; j++) if (student_cmp(&group[j], &ns) == 0) { 
+                exists = 1; 
+                os = group[j]; 
+                break; 
+            }
 
-            if (exists) {
+            if (exists && os->grades_len == 30) {
+                fprintf(
+                    stderr,
+                    "Błąd, przekroczono dozwoloną liczbę ocen dla: \"%s %s\"\n",
+                    os->first_name,
+                    os->last_name
+                );
+                exit(1);
+            }
+            else if (exists) {
                 strcpy(os->grades[os->grades_len], ns->grades[0]);
                 os->grades_len++;
                 free(ns);
             } else {
+                if (group_size <= group_len) {
+                    group_size += 8;
+                    group = realloc(group, sizeof(Student)*(group_size));
+                }
                 group[group_len] = ns;
                 group_len++;
             }
