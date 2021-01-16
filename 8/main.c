@@ -11,16 +11,16 @@ int compare (const void *_a, const void *_b) {
 
 int main(int argc, char *argv[]) {
 
-    int N = 0;
-    int n = 0;
+    double N = 0;
+    double n = 0;
     int i;
-    int j;
+    // int j;
     double max = 0;
     clock_t t;
 
     if(argc != 3) exit(1);
-    sscanf(argv[1], "%d", &N);
-    sscanf(argv[2], "%d", &n);
+    sscanf(argv[1], "%le", &N);
+    sscanf(argv[2], "%le", &n);
 
     double *rand_arr = malloc(sizeof(double)*N);
     int *histogram = malloc(sizeof(int)*n);
@@ -36,17 +36,19 @@ int main(int argc, char *argv[]) {
 
     for (i = 0; i<n; i++) if (max < histogram[i]) max = histogram[i];
 
-    printf("Rozkład wartości:\n");
-    for (i = 0; i<n; i++) {
-        int v = histogram[i] / max * 80;
-        for (j = 0; j<v; j++) printf("*");
-        printf("\n");
-    }
+    // printf("Rozkład wartości:\n");
+    // for (i = 0; i<n; i++) {
+    //     int v = histogram[i] / max * 80;
+    //     for (j = 0; j<v; j++) printf("*");
+    //     printf("\n");
+    // }
 
     t = clock();
     qsort(rand_arr, N, sizeof(double), compare);
     t = clock() - t;
-    printf("Czas wykonywania sortowania (stdlib qsort): %fms\n", ((double)t)/CLOCKS_PER_SEC*1e3);
+    //printf("Czas wykonywania sortowania (stdlib qsort): %fms\n", ((double)t)/CLOCKS_PER_SEC*1e3);
+    printf("%e,%e\n", (double)N, ((double)t)/CLOCKS_PER_SEC*1e3);
+
 
     for (i = 0; i<n; i++) histogram[i] = 0;
     for (i = 1; i<N; i++) {
@@ -56,12 +58,12 @@ int main(int argc, char *argv[]) {
 
     for (i = 0; i<n; i++) if (max < histogram[i]) max = histogram[i];
 
-    printf("\nRozkład różnic sąsiadów:\n");
-    for (i = 0; i<n; i++) {
-        int v = histogram[i] / max * 80;
-        for (j = 0; j<v; j++) printf("*");
-        printf("\n");
-    }
+    // printf("\nRozkład różnic sąsiadów:\n");
+    // for (i = 0; i<n; i++) {
+    //     int v = histogram[i] / max * 80;
+    //     for (j = 0; j<v; j++) printf("*");
+    //     printf("\n");
+    // }
 
     return 0;
 }
