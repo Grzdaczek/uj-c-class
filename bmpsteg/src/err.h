@@ -8,6 +8,7 @@
 #define WRITE_ACTION "write"
 
 typedef enum {
+    ERR_GENERIC,
     ERR_NO_ARG,
     ERR_INVALID_CMD,
     ERR_UNSUPORTED_FORMAT,

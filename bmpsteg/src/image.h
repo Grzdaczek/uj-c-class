@@ -7,19 +7,14 @@ typedef struct {
 } Pixel;
 
 typedef struct {
-    /* raw data from file */
-    char **header;
     Pixel *data;
-    /* computed/read properties */
-    int header_size;
     int data_size;
     int width;
     int height;
+    int bitdepth;
 } Image;
 
-Image* new_image(int width, int height);
-int free_image(Image* img);
-Image* read_image(FILE* stream);
-int write_image(FILE* stream, Image *img);
+int image_tap(Image* imgp);
+int image_invert(Image* imgp);
 
 #endif /* _IMAGE_H_ */

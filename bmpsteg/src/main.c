@@ -2,14 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "image.h"
+#include "action.h"
 #include "err.h"
 
-#define OPTION_IN "-i"
-#define OPTION_OUT "-o"
-#define OPTION_ACTION "-a"
-
 void print_help() {
-    
+
     printf("OPTIONS:\n");
     printf("  -i <file>\t\tPath to input image file, defaults to stdin\n");
     printf("  -o <file>\t\tPath to output image file, defaults to stdout\n");
@@ -18,130 +15,78 @@ void print_help() {
 
     printf("ACTIONS:\n");
     printf("  invert\t\tInvert colors\n");
-    // ...
 
     exit(0);
 }
 
-//#=---------------------------------------------------------------------------
+/*=-------------------------------------------------------------------------=*/
 
-typedef struct {
-    int argc;
-    char** argv;
-} ActionParams;
+int read_ppm(FILE* imgin, Image* imgp) {
+    size_t len;
+    char* line = NULL;
+    int res;
 
-typedef struct {
-    const char* label;
-    int (*dispatch)(int argc, char** argv);
-} ActionDispatcher;
+    /* format check */
+    res = getline(&line, &len, imgin);
+    if (!strcmp(line, "P6")) err(ERR_UNSUPORTED_FORMAT);
 
-int dispatch_null(int argc, char** argv) {
-    printf("NULL DISPATCHED");
+    while (getline(&line, &len, imgin) != -1 && line[0] == '#');
+
+    sscanf(line, "%d %d", &imgp->width, &imgp->height);
+    imgp->data_size = imgp->width * imgp->height;
+
+    getline(&line, &len, imgin);
+    sscanf(line, "%d", &imgp->bitdepth);
+    
+    imgp->data = malloc(imgp->data_size * sizeof(Pixel));
+    int result = fread(imgp->data, sizeof(Pixel), imgp->data_size, imgin);
+
     return 0;
 }
 
-const ActionDispatcher DISPATCHERS[] = {
-    {"null",    dispatch_null}
-};
-
-ActionDispatcher* match_dispatcher(char* label) {
-    if(label[0] != '-') return NULL;
-    int i;
-    int len = sizeof(DISPATCHERS)/sizeof(ActionDispatcher);
-    ActionDispatcher* cur_disp = NULL;
-
-    for (i = 0; i < len; i++) {
-        cur_disp = &DISPATCHERS[i];
-        if (!strcmp(cur_disp->label, label)) return &DISPATCHERS[i];
-    }
-
-    return NULL;
+int write_ppm(FILE* imgout, Image* imgp) {
+    fprintf(imgout, "P6\n");
+    fprintf(imgout, "%d %d\n", imgp->width, imgp->height);
+    fprintf(imgout, "%d\n", imgp->bitdepth);
+    fwrite(imgp->data, imgp->data_size, sizeof(Pixel), imgout);
+    return 0;
 }
 
 int main(int argc, char** argv) {
     int i, j, k;
-
+    char* curr_arg = NULL;
+    int queue_len = 0;
+    ActionParams queue[256];
     FILE *imgin = stdin;
     FILE *imgout = stdout;
 
-    char* curr_arg = NULL;
+    /* TEMP SOLUTION */
+    if (argc < 5) err(ERR_GENERIC);
+    imgin = fopen(argv[2], "rb");
+    imgout = fopen(argv[4], "wb");
 
-    
-    return 0;
-}
-
-//#=---------------------------------------------------------------------------
-/*
-typedef struct {
-    const char* prefix;
-    int (*dispatch)(int argc, char** argv);
-} OptionDispatcher;
-
-typedef struct {
-    OptionDispatcher* dispatcher;
-    int argc;
-    char** argv;
-} Option;
-
-int dispatch_input_option (int argc, char** argv) {
-    printf("INPUT DISPATCHED!\n");
-    return 0;
-}
-
-FILE* imgin = NULL;
-FILE* imgout = NULL;
-OptionDispatcher DISPATCHERS[] = {
-    {"-i",      dispatch_input_option},
-};
-
-OptionDispatcher* match_dispatcher(char* prefix) {
-    if(prefix[0] != '-') return NULL;
-    int i;
-    int len = sizeof(DISPATCHERS)/sizeof(OptionDispatcher);
-    OptionDispatcher* cur_disp = NULL;
-
-    for (i = 0; i < len; i++) {
-        cur_disp = &DISPATCHERS[i];
-        if (!strcmp(cur_disp->prefix, prefix)) return &DISPATCHERS[i];
-    }
-
-    return NULL;
-}
-
-int main(int argc, char* argv[]) {
-    int i, j, k;
-    int option_size = 0;
-    Option option_vals[256];
-    Option* cur_option = NULL;
-    OptionDispatcher *cur_disp = NULL;
-
-    for (i = 1; i < argc; i++) {            
-        if ((cur_disp = match_dispatcher(argv[i]))) {
-            cur_option = &option_vals[option_size];
-            cur_option->dispatcher = cur_disp;
-            cur_option->argv = &argv[i];
-            cur_option->argc = 0;
-            option_size += 1;
+    for (i = 5; i < argc; i++) {
+        if (argv[i][0] == '-') {
+            queue_len += 1;
+            queue[queue_len-1].argc = 1;
+            queue[queue_len-1].argv = &argv[i];
         }
-        else if (argv[i][0] == '-') err(ERR_UNKNOWN_OPTION);
-        else if (cur_option) cur_option->argc += 1;
+        else {
+            queue[queue_len-1].argc += 1;
+        }
     }
 
-    imgin = stdin;
-    imgout = stdout;
+    Image img;
+    img.data = NULL;
+    read_ppm(imgin, &img);
 
-    printf("%d\n", option_size);
-
-    for (i = 0; i < option_size; i++) {
-        cur_option = &option_vals[i];
-        cur_option->dispatcher->dispatch(cur_option->argc, cur_option->argv);
+    for (i = 0; i < queue_len; i++) {
+        ActionDispatcher dispatcher = match_dispatcher(queue[i].argv[0]);
+        if (dispatcher) dispatcher(&img, queue[i]);
+        printf("%s\n", queue[i].argv[0]);
     }
 
-    // FILE *i_imgf = fopen(i_imgp, "rb");
-    // FILE *o_datf = o_datp ? fopen(o_datp, "rb") : stdout;
-    // Image *img = read_image(i_imgf);
+    write_ppm(imgout, &img);
 
     return 0;
 }
-*/
-
