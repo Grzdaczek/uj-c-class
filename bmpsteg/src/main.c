@@ -21,37 +21,6 @@ void print_help() {
 
 /*=-------------------------------------------------------------------------=*/
 
-int read_ppm(FILE* imgin, Image* imgp) {
-    size_t len;
-    char* line = NULL;
-    int res;
-
-    /* format check */
-    res = getline(&line, &len, imgin);
-    if (!strcmp(line, "P6")) err(ERR_UNSUPORTED_FORMAT);
-
-    while (getline(&line, &len, imgin) != -1 && line[0] == '#');
-
-    sscanf(line, "%d %d", &imgp->width, &imgp->height);
-    imgp->data_size = imgp->width * imgp->height;
-
-    getline(&line, &len, imgin);
-    sscanf(line, "%d", &imgp->bitdepth);
-    
-    imgp->data = malloc(imgp->data_size * sizeof(Pixel));
-    int result = fread(imgp->data, sizeof(Pixel), imgp->data_size, imgin);
-
-    return 0;
-}
-
-int write_ppm(FILE* imgout, Image* imgp) {
-    fprintf(imgout, "P6\n");
-    fprintf(imgout, "%d %d\n", imgp->width, imgp->height);
-    fprintf(imgout, "%d\n", imgp->bitdepth);
-    fwrite(imgp->data, imgp->data_size, sizeof(Pixel), imgout);
-    return 0;
-}
-
 int main(int argc, char** argv) {
     int i, j, k;
     char* curr_arg = NULL;
@@ -78,15 +47,15 @@ int main(int argc, char** argv) {
 
     Image img;
     img.data = NULL;
-    read_ppm(imgin, &img);
+    image_read_ppm(&img, imgin);
 
     for (i = 0; i < queue_len; i++) {
         ActionDispatcher dispatcher = match_dispatcher(queue[i].argv[0]);
         if (dispatcher) dispatcher(&img, queue[i]);
-        printf("%s\n", queue[i].argv[0]);
     }
 
-    write_ppm(imgout, &img);
+    image_write_ppm(&img, imgout);
+    free(img.data);
 
     return 0;
 }

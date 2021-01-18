@@ -34,7 +34,7 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 all: $(BINDIR)/$(BINFILE)
 
 $(BINDIR)/$(BINFILE): $(OBJS) $(DEPS)
-	@printf "  LD\t$<\n"
+	@printf "  LD\t$^\n"
 	@mkdir -p $(dir $@)
 	$(Q)$(LD) $(LDLAGS) $(OBJS) -o $@
 
@@ -56,3 +56,5 @@ i:
 	@printf "$(DEPS)\n"
 
 .PHONY: i all clean
+
+include test/test.mk
