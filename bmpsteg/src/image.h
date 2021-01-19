@@ -3,8 +3,7 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
-#define MINMAX(a,b,c) MIN(MAX(a,b),c)
-#define CLAMP(a) MIN(MAX(a,0),255)
+#define CLAMP_8B(a) MIN(MAX(a,0),255)
 
 #include <stdio.h>
 
@@ -19,10 +18,14 @@ typedef struct {
 
 typedef struct {
     unsigned char r, g, b;
-} Pixel;
+} PxRGB;
 
 typedef struct {
-    Pixel *data;
+    unsigned char h, s, v;
+} PxHSV;
+
+typedef struct {
+    PxRGB *data;
     int data_size;
     int width;
     int height;
@@ -31,7 +34,6 @@ typedef struct {
 
 int image_read_ppm(Image* imgp, FILE* imgin);
 int image_write_ppm(Image* imgp, FILE* imgout);
-int image_tap(Image* imgp);
 int image_invert(Image* imgp);
 int image_scale_nn(Image* imgp, int w, int h);
 int image_dither(Image* imgp);

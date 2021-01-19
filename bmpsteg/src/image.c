@@ -5,32 +5,14 @@
 #include "err.h"
 
 /*=-------------------------------------------------------------------------=*/
-/* 
-int imgx(Image* imgp, int i) {
-    if (i >=imgp->data_size) return -1;
-    return i % imgp->width;
-}
-
-int imgy(Image* imgp, int i) {
-    if (i >= imgp->data_size) return -1;
-    return i / imgp->width;
-}
-
-int imgi(Image* imgp, int x, int y) {
-    if (x >= imgp->width || y >= imgp->height) return -1;
-    return imgp->width * y + x;
-}
-*/
-/*=-------------------------------------------------------------------------=*/
 
 int image_read_ppm(Image* imgp, FILE* imgin) {
     size_t len;
     char* line = NULL;
     int res;
 
-    /* format check */
     res = getline(&line, &len, imgin);
-    if (!strcmp(line, "P6")) err(ERR_UNSUPORTED_FORMAT);
+    if (!strcmp(line, "P6")) fail(ERR_FILE_READ, "");
 
     while (getline(&line, &len, imgin) != -1 && line[0] == '#');
 
@@ -40,8 +22,8 @@ int image_read_ppm(Image* imgp, FILE* imgin) {
     getline(&line, &len, imgin);
     sscanf(line, "%d", &imgp->bitdepth);
     
-    imgp->data = malloc(imgp->data_size * sizeof(Pixel));
-    int result = fread(imgp->data, sizeof(Pixel), imgp->data_size, imgin);
+    imgp->data = malloc(imgp->data_size * sizeof(PxRGB));
+    int result = fread(imgp->data, sizeof(PxRGB), imgp->data_size, imgin);
 
     return 0;
 }
@@ -50,25 +32,15 @@ int image_write_ppm(Image* imgp, FILE* imgout) {
     fprintf(imgout, "P6\n");
     fprintf(imgout, "%d %d\n", imgp->width, imgp->height);
     fprintf(imgout, "%d\n", imgp->bitdepth);
-    fwrite(imgp->data, imgp->data_size, sizeof(Pixel), imgout);
+    fwrite(imgp->data, imgp->data_size, sizeof(PxRGB), imgout);
     return 0;
-}
-
-int image_tap(Image* imgp) {
-    int i, j;
-
-    for (i = 0; i < imgp->data_size; i++) {
-        printf("%x %x %x", imgp->data[i].r, imgp->data[i].g, imgp->data[i].b);
-        if (i % imgp->width) printf(" ");
-        else printf("\n");
-    }
 }
 
 int image_invert(Image* imgp) {
     int i;
 
     for (i = 0; i < imgp->data_size; i++) {
-        Pixel* pix = &imgp->data[i];
+        PxRGB* pix = &imgp->data[i];
         pix->r = 0xFF ^ pix->r;
         pix->g = 0xFF ^ pix->g;
         pix->b = 0xFF ^ pix->b;
@@ -81,7 +53,7 @@ int image_scale_nn(Image* imgp, int nw, int nh) {
     double sx = (double)nw / imgp->width;
     double sy = (double)nh / imgp->height;
 
-    Pixel* datp = malloc(nsize * sizeof(Pixel));
+    PxRGB* datp = malloc(nsize * sizeof(PxRGB));
 
     for (i = 0; i < nsize; i++) {
         int nx = i % nw;
@@ -102,7 +74,7 @@ int image_dither(Image* imgp) {
     int i;
     int w = imgp->width;
     int h = imgp->height;
-    Pixel* px = imgp->data;
+    PxRGB* px = imgp->data;
 
     for (i = 0; i < imgp->data_size; i++) {
         int oluma = (px[i].g + px[i].g + px[i].b) / 3;
@@ -127,7 +99,7 @@ int image_kernel_filter(Image* imgp, Kernel kernel) {
     int j;
     int kw = kernel.size;
     double ksum = 0;
-    Pixel* data = malloc(imgp->data_size * sizeof(Pixel));
+    PxRGB* data = malloc(imgp->data_size * sizeof(PxRGB));
 
     for (i = 0; i < imgp->data_size; i++) {
         double r = 0;
@@ -148,9 +120,9 @@ int image_kernel_filter(Image* imgp, Kernel kernel) {
             b += imgp->data[ii].b * kernel.data[j];
             ksum += kernel.data[j];
         }
-        data[i].r = (int)MINMAX(r / ksum, 0, 255);
-        data[i].g = (int)MINMAX(g / ksum, 0, 255);
-        data[i].b = (int)MINMAX(b / ksum, 0, 255);
+        data[i].r = (int)CLAMP_8B(r / ksum);
+        data[i].g = (int)CLAMP_8B(g / ksum);
+        data[i].b = (int)CLAMP_8B(b / ksum);
     }
 
     free(imgp->data);
@@ -160,7 +132,7 @@ int image_kernel_filter(Image* imgp, Kernel kernel) {
 
 int image_resize(Image* imgp, int w, int h, int x, int y) {
     int i;
-    Pixel* data = malloc(w * h * sizeof(Pixel));
+    PxRGB* data = malloc(w * h * sizeof(PxRGB));
 
     for ( i = 0; i < w * h; i++) {
         int ix = i % w - x;
@@ -195,9 +167,9 @@ int image_contrast(Image* imgp, double x) {
     int i;
 
     for ( i = 0; i < imgp->data_size; i++) {
-        imgp->data[i].r = CLAMP(((imgp->data[i].r - 256/2) * x ) + 256/2);
-        imgp->data[i].g = CLAMP(((imgp->data[i].g - 256/2) * x ) + 256/2);
-        imgp->data[i].b = CLAMP(((imgp->data[i].b - 256/2) * x ) + 256/2);
+        imgp->data[i].r = CLAMP_8B(((imgp->data[i].r - 256/2) * x ) + 256/2);
+        imgp->data[i].g = CLAMP_8B(((imgp->data[i].g - 256/2) * x ) + 256/2);
+        imgp->data[i].b = CLAMP_8B(((imgp->data[i].b - 256/2) * x ) + 256/2);
     }
 }
 
@@ -212,26 +184,8 @@ int image_brightness(Image* imgp, int db) {
     }
 }
 
-
 int image_hue(Image* imgp, int dh) {
 
-}
-
-int image_perspective(Image* imgp, Point nw, Point ne, Point sw, Point se) {
-    /**
-     *  nw--ne
-     *  |    |
-     *  sw--se
-    */
-    int i;
-    Pixel temp;
-    Pixel* datp = malloc(imgp->data_size * sizeof(Pixel));
-    int w = imgp->width;
-    int h = imgp->height;
-
-    for (i = 0; i < imgp->data_size; i++) {
-        Point curr = {i % w, i / w};
-    }
 }
 
 /*=-------------------------------------------------------------------------=*/

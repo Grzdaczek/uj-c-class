@@ -3,9 +3,7 @@
 #include "action.h"
 #include "err.h"
 
-int dispatch_tap(Image *imgp, ActionParams params) {
-    return image_tap(imgp);
-}
+/*=-------------------------------------------------------------------------=*/
 
 int dispatch_invert(Image *imgp, ActionParams params) {
     return image_invert(imgp);
@@ -94,6 +92,6 @@ ActionDispatcher match_dispatcher(char* label) {
         if (!strcmp(DISPATCHERS[i].label, label)) return DISPATCHERS[i].disp;
     }
 
-	err(ERR_INVALID_CMD);
+	fail(ERR_OPTION_UNKNOWN, label);
     return NULL;
 }

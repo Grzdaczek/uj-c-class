@@ -1,21 +1,18 @@
 #ifndef _ERR_H_
 #define _ERR_H_
 
-#define PROG_NAME "ppmsteg"
-#define printerr(string) fprintf(stderr, PROG_NAME": error: "string)
+#define ERR_GENERIC "internal"
 
-#define READ_ACTION "read"
-#define WRITE_ACTION "write"
+#define ERR_NO_ARG "no arguments"
+#define ERR_NO_OPTION "no options"
+#define ERR_NO_INPUT "no input file selected"
+#define ERR_NO_OUTPUT "no output file selected"
 
-typedef enum {
-    ERR_GENERIC,
-    ERR_NO_ARG,
-    ERR_INVALID_CMD,
-    ERR_UNSUPORTED_FORMAT,
-    ERR_UNKNOWN_OPTION,
-    ERR_NO_OPTION,
-} ErrCode;
+#define ERR_FILE_OPEN "cannot open the file"
+#define ERR_FILE_READ "cannot read ppm image, file might be corupted"
 
-void err(ErrCode code);
+#define ERR_OPTION_UNKNOWN "unknown option"
+
+void fail(char* code, char* comment);
 
 #endif /* _ERR_H */

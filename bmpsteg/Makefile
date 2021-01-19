@@ -10,11 +10,12 @@ SRCDIR	:= src
 OBJDIR	:= obj
 BINDIR	:= bin
 DEPDIR 	:= deps
+TESTDIR	:= test
 
 SRCS	:= $(CFILES:%=$(SRCDIR)/%)
 OBJS	:= $(CFILES:%.c=$(OBJDIR)/%.o)
 DEPS	:= $(CFILES:%.c=$(DEPDIR)/%.d)
-BUILDDIRS = $(OBJDIR) $(BINDIR) $(DEPDIR)
+BUILDDIRS = $(OBJDIR) $(BINDIR) $(DEPDIR) $(TESTDIR)
 
 V	?= 0
 ifeq ($(V),0)
@@ -29,8 +30,7 @@ CFLAGS	+= $(OPT)
 LDFLAGS	+= #...
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
-#=-- Rules --------------------------------------------------------------------
-
+#=-- Build Rules --------------------------------------------------------------
 all: $(BINDIR)/$(BINFILE)
 
 $(BINDIR)/$(BINFILE): $(OBJS) $(DEPS)
@@ -55,6 +55,34 @@ i:
 	@printf "$(OBJS)\n"
 	@printf "$(DEPS)\n"
 
-.PHONY: i all clean
+#=-- Tests --------------------------------------------------------------------
+IMG		= Lenna.ppm
+TAIL	= #-resize 1024 512 512 0 -compose $(IMG)
+HEAD	= $(Q)$(BINDIR)/$(BINFILE) $(IMG) $(TESTDIR)/$@.ppm
 
-include test/test.mk
+OPTIONLESS = invert dither sharpen
+OPTIONFULL = blur scale contrast
+
+test: $(TESTDIR) $(BINDIR)/$(BINFILE) $(OPTIONLESS) $(OPTIONFULL)
+
+$(TESTDIR):
+	@mkdir -p $(TESTDIR)
+
+$(OPTIONLESS):
+	@printf "  GEN\t$@\n"
+	$(HEAD) -$@ $(TAIL)
+
+blur:
+	@printf "  GEN\t$@\n"
+	$(HEAD) -$@ 10 $(TAIL)
+
+scale:
+	@printf "  GEN\t$@\n"
+	$(HEAD) -$@ 1024 1024 $(TAIL)
+
+contrast:
+	@printf "  GEN\t$@\n"
+	$(HEAD) -$@ 1.5 $(TAIL)
+
+
+.PHONY: all clean test
