@@ -9,14 +9,25 @@ int compare (const void *_a, const void *_b) {
     return (a > b) ? 1 : -1;
 }
 
+void print_histogram(int* histogram, int n, char* title) {
+    int i, j;
+    double max = 0;
+
+    fprintf(stderr, "%s\n", title);
+    for (i = 0; i<n; i++) if (max < histogram[i]) max = histogram[i];
+    for (i = 0; i<n; i++) {
+        int v = histogram[i] / max * 80;
+        for (j = 0; j<v; j++) fprintf(stderr, "*");
+        fprintf(stderr, "\n");
+    }
+}
+
 int main(int argc, char *argv[]) {
 
     double N = 0;
     double n = 0;
     int i;
-    // int j;
-    double max = 0;
-    clock_t t;
+    
 
     if(argc != 3) exit(1);
     sscanf(argv[1], "%le", &N);
@@ -34,21 +45,14 @@ int main(int argc, char *argv[]) {
         histogram[(int)(n*rand)] += 1;
     }
 
-    for (i = 0; i<n; i++) if (max < histogram[i]) max = histogram[i];
+    /* print_histogram(histogram, n, "\nRozkład wartości:"); */
 
-    // printf("Rozkład wartości:\n");
-    // for (i = 0; i<n; i++) {
-    //     int v = histogram[i] / max * 80;
-    //     for (j = 0; j<v; j++) printf("*");
-    //     printf("\n");
-    // }
-
-    t = clock();
+    clock_t start = clock();
     qsort(rand_arr, N, sizeof(double), compare);
-    t = clock() - t;
-    //printf("Czas wykonywania sortowania (stdlib qsort): %fms\n", ((double)t)/CLOCKS_PER_SEC*1e3);
-    printf("%e,%e\n", (double)N, ((double)t)/CLOCKS_PER_SEC*1e3);
+    clock_t end = clock();
 
+    /* fprintf(stderr, "Czas wykonywania sortowania (stdlib qsort):\n"); */
+    printf("%e\t%e\n", N, ((double)(end-start))/CLOCKS_PER_SEC*1e3);
 
     for (i = 0; i<n; i++) histogram[i] = 0;
     for (i = 1; i<N; i++) {
@@ -56,14 +60,10 @@ int main(int argc, char *argv[]) {
         histogram[(int)(n*d)] += 1;
     }
 
-    for (i = 0; i<n; i++) if (max < histogram[i]) max = histogram[i];
+    /* print_histogram(histogram, n, "\nRozkład różnic sąsiadów:"); */
 
-    // printf("\nRozkład różnic sąsiadów:\n");
-    // for (i = 0; i<n; i++) {
-    //     int v = histogram[i] / max * 80;
-    //     for (j = 0; j<v; j++) printf("*");
-    //     printf("\n");
-    // }
+    free(rand_arr);
+    free(histogram);
 
     return 0;
 }

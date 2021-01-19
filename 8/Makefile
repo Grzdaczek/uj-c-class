@@ -3,22 +3,22 @@ CFLAGS	+= -ansi -Wall
 
 CFILES		= main.c
 OUTFILE		= a.out
-BENCHFILE	= benchmark.csv
+BENCHFILE	= test.csv
 
 all: main.c
 	$(CC) $(CFLAGS) main.c -o $(OUTFILE)
 
-benchmark:
+test:
 	rm -f $(BENCHFILE)
-	./$(OUTFILE) 1e1 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e2 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e3 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e4 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e5 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e6 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e7 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e8 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e9 10 >> $(BENCHFILE)
-	./$(OUTFILE) 1e10 10 >> $(BENCHFILE)
+	@./$(OUTFILE) 1e5 10 >> $(BENCHFILE)
 
-.PHONY: all benchmark
+tt:
+	rm -f $(BENCHFILE)
+	for number in \
+	1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 \
+	16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 ; do \
+        echo $$number ; \
+		./$(OUTFILE) $$(number)e5 10 >> $(BENCHFILE) ; \
+    done
+
+.PHONY: all test tt
